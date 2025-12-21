@@ -2,6 +2,7 @@
 const prisma = require('../../lib/prisma'); 
 const bcrypt = require('bcrypt');
 const {userRules} = require('../../utils/roles')
+const generateToken = require('../../utils/generateToken');
 
 const register = async ({ firstName, lastName, username, email, password, address, role }) => {
     const oldEmail = await prisma.user.findUnique({ where: { email } });
@@ -16,7 +17,7 @@ const register = async ({ firstName, lastName, username, email, password, addres
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    return prisma.user.create({
+    const user = prisma.user.create({
         data: {
             firstName,
             lastName,
@@ -27,6 +28,15 @@ const register = async ({ firstName, lastName, username, email, password, addres
             role
         }
     });
+
+    const token = generateToken(user);
+    return {user: {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      email: user.email
+    }, token };
 };
 
 const getAllUsers = async () => {
@@ -56,8 +66,15 @@ const login = async(email, password) =>{
     if(!passwordDecryption){
       throw new Error("Invalid Email or Password")
     }
-    return user;
-  }
+    const token = generateToken(user);
+    return {user: {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      email: user.email
+    }, token };
+}
 
 
 module.exports = { getAllUsers,getAllVendors, vendorRegistration, userRegistration, login};
