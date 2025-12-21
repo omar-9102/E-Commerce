@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. Identity & Roles
+enum Role {
+  USER
+  VENDOR
+  ADMIN
+  SUPER_ADMIN
+}
+
+model User {
+  id        String    @id @default(uuid())
+  firstName String
+  lastName  String
+  password  String
+  username  String    @unique
+  email     String    @unique
+  address   String
+  role      Role      @default(USER)
+  avatar    String?
+  products  Product[] // If user is a vendor
+  orders    Order[]   // Orders made by the user
+  reviews   Review[]  // Reviews written by the user
+  cart      Cart?     // Each user has one cart
+  coupons   Coupon[]  // Coupons owned by vendors
+}
+
+// 2. Catalog & Taxonomy
+model Category {
+  id             String     @id @default(uuid())
+  name           String
+  parentId       String?    // Self-relation for sub-categories
+  parent         Category?  @relation("SubCategories", fields: [parentId], references: [id])
+  subCategories  Category[] @relation("SubCategories")
+  products       Product[]
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String
+  price       Decimal
+  vendorId    String
+  vendor      User        @relation(fields: [vendorId], references: [id])
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
+  images Image[] // Establishes a one-to-many relationship
+  reviews     Review[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+}
+
+model Image {
+  id        String  @id @default(uuid())
+  url       String  // Stores the URL from the storage service
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+// 3. Cart & Ordering
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @default(1)
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  items       OrderItem[]
+  totalAmount Decimal
+  couponId    String?     // Optional coupon
+  coupon      Coupon?     @relation(fields: [couponId], references: [id])
+  payment     Payment?
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+}
+
+model OrderItem {
+  id              String  @id @default(uuid())
+  orderId         String
+  order           Order   @relation(fields: [orderId], references: [id])
+  productId       String
+  product         Product @relation(fields: [productId], references: [id])
+  quantity        Int
+  priceAtPurchase Decimal // Snapshot of price at time of order
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  CANCELLED
+}
+
+// 4. Promotions & Reviews
+model Coupon {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  discount  Decimal
+  vendorId  String
+  vendor    User     @relation(fields: [vendorId], references: [id])
+  orders    Order[]
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int      // 1-5 scale
+  comment   String?
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+// 5. Payment Details
+model Payment {
+  id            String        @id @default(uuid())
+  orderId       String        @unique
+  order         Order         @relation(fields: [orderId], references: [id])
+  amount        Decimal
+  method        String        // e.g., "STRIPE", "PAYPAL"
+  status        PaymentStatus @default(PENDING)
+  transactionId String?       @unique // ID from payment provider
+  updatedAt     DateTime      @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
