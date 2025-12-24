@@ -4,7 +4,8 @@ const productServices = require('./products.services')
 
 const createProduct = async(req, res, next) =>{
     try{
-        const product = await productServices.createProduct(req.body)
+        const vendorId = req.user.id;
+        const product = await productServices.createProduct({ ...req.body, vendorId });
         return res.status(201).json({message: "Product created successfully", data: product});
     }catch(error){
         return next(appErrors.create(error.message, 500, httpStatusText.ERROR) );
