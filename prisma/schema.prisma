@@ -48,11 +48,12 @@ model Product {
   name        String
   description String
   price       Decimal
+  stock       Int
   vendorId    String
   vendor      User        @relation(fields: [vendorId], references: [id])
   categoryId  String
   category    Category    @relation(fields: [categoryId], references: [id])
-  images Image[] // Establishes a one-to-many relationship
+  images      Image[] // Establishes a one-to-many relationship
   reviews     Review[]
   cartItems   CartItem[]
   orderItems  OrderItem[]

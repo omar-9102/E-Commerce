@@ -9,6 +9,7 @@ const httpStatusText = require('./utils/httpStatusText');
 
 const userRoutes = require('./Modules/Users/users.routes');
 const categoryRoutes = require('./Modules/Categories/categories.routes')
+const productRoutes = require('./Modules/Products/products.routes')
 
 const app = express()
 
@@ -21,6 +22,7 @@ app.use(express.json())
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/products', productRoutes);
 
 // Middleware to parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
