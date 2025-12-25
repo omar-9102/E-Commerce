@@ -1,6 +1,5 @@
 const Joi = require('joi')
-const appError = require('../../utils/AppError');
-const httpStatusText = require('../../utils/httpStatusText');
+
 
 const createValidCategory = Joi.object({
     name: Joi.string().min(3).max(150).required().messages({
@@ -9,7 +8,7 @@ const createValidCategory = Joi.object({
         'string.max': `Category must have a maximum length of {#limit} characters`,
         'any.required': `Category name is required`
     }),
-    parentId: Joi.string().min(3).max(15).optional()
+    parentId: Joi.string().min(3).max(100).optional()
 })
 
 module.exports = {createValidCategory}

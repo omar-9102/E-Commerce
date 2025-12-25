@@ -5,6 +5,10 @@ const categoriesController = require('./categories.contoller')
 const categoriesValidators = require('./categories.validators')
 
 router.post('/createCategory', validate(categoriesValidators.createValidCategory), categoriesController.createCategory);
-router.get('/getCategoriesTree', categoriesController.getCategoryTree);
+// router.get('/getCategoriesTree', categoriesController.getCategoryTree);
+router.get('/getCategoriesTreeWithProducts', categoriesController.getCategoriesTreeWithProducts);
+router.get('/getCategoriesTree', categoriesController.getCategoriesTree);
+router.patch('/updateCategory/:id', categoriesController.updateCategory);
+router.delete('/deleteCategory/:id', categoriesController.deleteCategory);
 
 module.exports = router;
