@@ -37,6 +37,12 @@ const registerUserSchema = Joi.object({
         'string.min': `Address must have a minimum length of {#limit} digits`,
         'string.max': `Address must have a maximum length of {#limit} digits`,
         'any.required': `Address is required`
+    }),
+    phone: Joi.string().min(5).max(30).required().messages({
+        'string.empty': `Enter your phone number`,
+        'string.min': `Phone number must have a minimum length of {#limit} digits`,
+        'string.max': `Phone number must have a maximum length of {#limit} digits`,
+        'any.required': `Phone number is required`
     })
 })
 

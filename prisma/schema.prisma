@@ -23,9 +23,11 @@ model User {
   password  String
   username  String    @unique
   email     String    @unique
+  phone     String?   @unique
   address   String
   role      Role      @default(USER)
-  avatar    String?
+  avatarUrl String?
+  publicId  String?
   products  Product[] // If user is a vendor
   orders    Order[]   // Orders made by the user
   reviews   Review[]  // Reviews written by the user
@@ -63,6 +65,7 @@ model Image {
   id        String  @id @default(uuid())
   url       String  // Stores the URL from the storage service
   productId String
+  publicId  String
   product   Product @relation(fields: [productId], references: [id])
 }
 
