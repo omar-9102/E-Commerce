@@ -63,8 +63,15 @@ const vendorRegistration = async (data, file) => {
 };
 
 const userRegistration = async (data, file) => {
-    return register({ ...data, role: userRules.USER }, file);
-}
+    const { user, token } = await register({ ...data, role: userRules.USER }, file);
+
+    await prisma.cart.create({
+        data: { userId: user.id }
+    });
+
+    return { user, token };
+};
+
 
 const updateProfile = async (id, data = {}, file) => {
     const allowedUpdates = ['firstName', 'lastName', 'username', 'address'];

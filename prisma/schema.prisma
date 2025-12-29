@@ -75,15 +75,20 @@ model Cart {
   userId    String     @unique
   user      User       @relation(fields: [userId], references: [id])
   items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model CartItem {
   id        String   @id @default(uuid())
   cartId    String
-  cart      Cart     @relation(fields: [cartId], references: [id])
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
   quantity  Int      @default(1)
+
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId])
 }
 
 model Order {
@@ -139,19 +144,28 @@ model Review {
 
 // 5. Payment Details
 model Payment {
-  id            String        @id @default(uuid())
-  orderId       String        @unique
-  order         Order         @relation(fields: [orderId], references: [id])
-  amount        Decimal
-  method        String        // e.g., "STRIPE", "PAYPAL"
-  status        PaymentStatus @default(PENDING)
-  transactionId String?       @unique // ID from payment provider
-  updatedAt     DateTime      @updatedAt
+  id        String         @id @default(uuid())
+  orderId   String         @unique
+  order     Order          @relation(fields: [orderId], references: [id])
+  amount    Decimal
+  status    PaymentStatus
+  method    PaymentMethod
+  createdAt DateTime       @default(now())
 }
+
+
 
 enum PaymentStatus {
   PENDING
   COMPLETED
   FAILED
   REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  CASH
+  WALLET
+  PAYPAL
+  STRIPE
 }
