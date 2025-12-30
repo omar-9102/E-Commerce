@@ -7,6 +7,7 @@ const httpStatusText = require('./utils/httpStatusText');
 const userRoutes = require('./Modules/Users/users.routes');
 const categoryRoutes = require('./Modules/Categories/categories.routes')
 const productRoutes = require('./Modules/Products/products.routes')
+const cartRoutes = require('./Modules/Cart/cart.routes')
 
 const app = express()
 
@@ -20,6 +21,7 @@ app.use(express.json())
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/cart', cartRoutes)
 
 
 //! Global Error Handler
