@@ -1,7 +1,6 @@
 const httpStatusText = require('../../utils/httpStatusText')
 const prisma = require('../../lib/prisma');
 const appError = require('../../utils/AppError');
-const { get } = require('./cart.routes');
 
 const addToCart = async(productId, userId, quantity)=>{
     let cart = await prisma.cart.findUnique({where:{userId: userId}})
