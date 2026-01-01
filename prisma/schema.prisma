@@ -144,13 +144,15 @@ model Review {
 
 // 5. Payment Details
 model Payment {
-  id        String         @id @default(uuid())
-  orderId   String         @unique
-  order     Order          @relation(fields: [orderId], references: [id])
-  amount    Decimal
-  status    PaymentStatus
-  method    PaymentMethod
-  createdAt DateTime       @default(now())
+  id String @id @default(uuid())
+  orderId String @unique
+  order Order @relation(fields: [orderId], references: [id])
+  amount Decimal
+  status PaymentStatus
+  method PaymentMethod
+  createdAt DateTime @default(now())
+
+  paymobOrderId String?   @unique   // optional field to store Paymob order ID
 }
 
 
