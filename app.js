@@ -11,6 +11,7 @@ const cartRoutes = require('./Modules/Cart/cart.routes')
 const paymentRoutes = require('./Modules/Payment/payment.routes')
 const webHookRoutes = require('./Modules/Payment/paymobWebHook.route')
 const orderRoutes = require('./Modules/Orders/orders.routes')
+const reviewRoutes = require('./Modules/Reviews/reviews.routes')
 
 
 const app = express()
@@ -29,6 +30,7 @@ app.use('/api/cart', cartRoutes)
 app.use('/api/payment', paymentRoutes)
 app.use('/api/webHook', webHookRoutes)
 app.use('/api/order', orderRoutes)
+app.use('/api/review', reviewRoutes)
 
 
 //! Global Error Handler

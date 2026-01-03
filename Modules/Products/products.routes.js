@@ -11,5 +11,7 @@ router.get('/getAllProductsPaginated', productsController.getAllProductsPaginate
 router.patch('/updateProduct/:id', verifyToken, allowTo(userRules.VENDOR), productsController.updateProduct);
 router.delete('/deleteProduct/:id', verifyToken, allowTo(userRules.VENDOR), productsController.deleteProduct);
 router.get('/getVendorProducts', verifyToken, allowTo(userRules.VENDOR), productsController.getVendorProducts);
+router.post('/:productId/review', verifyToken, allowTo(userRules.USER), productsController.review)
+router.get('/showMyReviews', verifyToken, allowTo(userRules.USER),productsController.getMyReviews )
 
 module.exports = router;

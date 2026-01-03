@@ -99,10 +99,13 @@ const updateProduct = async(productId, data) =>{
     return updatedProduct;
 }
 
-const deleteProduct = async(productId) =>{
+const deleteProduct = async(productId, vendorId) =>{
     const product = await prisma.product.findUnique({where: {id: productId}, select:{id: true}})
     if(!product)
         throw Error("Product not found", 404)
+
+    if(product.vendorId !== vendorId)
+        throw appError.create("You are unauthorized to delete this product", 403, httpStatusText.ERROR)
 
     // validate if product is part of any order
     const ordersWithProduct = await prisma.orderItem.findFirst({where: {productId}})
@@ -120,4 +123,55 @@ const getVendorProducts = async(vendorId) =>{
     return products;
 }
 
-module.exports = { createProduct, updateProduct, getAllProductsPaginated, getVendorProducts,deleteProduct };
+const makeReview = async(userId, productId, rating, comment) =>{
+    if(rating > 5 || rating < 1)
+        throw appError.create("Rating must be between 1 and 5", 400, httpStatusText.ERROR)
+
+    const product = await prisma.product.findUnique({where:{id:productId}})
+
+    if(!product)
+        throw appError.create("Product not found", 404, httpStatusText.ERROR)
+
+    const isPurchased = await prisma.order.findFirst({
+        where:{userId,
+            status:'PAID',
+            items:{
+                some:{productId}
+            }
+    }})
+    if(!isPurchased)
+        throw appError.create("You must purchase for reviewing this product", 403, httpStatusText.ERROR)
+
+    const isReviewed = await prisma.review.findUnique({where:{userId_productId:{userId, productId}}})
+    if(isReviewed)
+        throw appError.create('You already reviewd the product', 400, httpStatusText.ERROR)
+
+    const review = await prisma.review.create({
+        data:{
+            rating,
+            comment,
+            userId,
+            productId
+        }
+    })
+
+    return review
+}
+
+const getMyReviews = async(userId) =>{
+    const reviews = await prisma.review.findMany({where:{userId},
+        select:{
+            id: true,
+            productId: true,
+            rating: true,
+            comment:true
+        }
+    })
+
+    if(reviews.length === 0)
+        throw appError.create("User have not made any reviews", 404, httpStatusText.FAIL)
+
+    return reviews
+}
+
+module.exports = { createProduct, updateProduct, getAllProductsPaginated, getVendorProducts,deleteProduct, makeReview, getMyReviews };

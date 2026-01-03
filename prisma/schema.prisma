@@ -133,14 +133,21 @@ model Coupon {
 
 model Review {
   id        String   @id @default(uuid())
-  rating    Int      // 1-5 scale
+  rating    Int
   comment   String?
+
   productId String
   product   Product  @relation(fields: [productId], references: [id])
+
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+
   createdAt DateTime @default(now())
+  
+
+  @@unique([userId, productId])
 }
+
 
 // 5. Payment Details
 model Payment {

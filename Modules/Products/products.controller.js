@@ -46,11 +46,34 @@ const updateProduct = async(req, res, next) =>{
 const deleteProduct = async(req, res, next) =>{
     try{
         const productId = req.params.id
-        await productServices.deleteProduct(productId);
+        const vendorId = req.user.id
+        await productServices.deleteProduct(productId, vendorId);
         return res.status(200).json({message: "Product deleted successfully"});
     }catch(error){
         return next(appError.create(error.message, 500, httpStatusText.ERROR) );
     }
 }
 
-module.exports = {createProduct, getAllProductsPaginated, updateProduct, deleteProduct, getVendorProducts};
+const review = async(req, res, next) =>{
+    try{
+        const userId = req.user.id
+        const {comment, rating} = req.body
+        const productId = req.params.productId
+        const review = await productServices.makeReview(userId, productId, rating, comment)
+        res.status(200).json({message:"Thanks for review", data: review})
+    }catch(error){
+        return next(error)
+    }
+}
+
+const getMyReviews = async(req, res, next) =>{
+    try{
+        const userId = req.user.id
+        const reviews = await productServices.getMyReviews(userId)
+        res.status(200).json({message:"Here are all your reviews", data: reviews})
+    }catch(error){
+        return next(error)
+    }
+}
+
+module.exports = {createProduct, getAllProductsPaginated, updateProduct, deleteProduct, getVendorProducts, review, getMyReviews};
