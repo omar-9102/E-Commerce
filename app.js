@@ -12,6 +12,7 @@ const paymentRoutes = require('./Modules/Payment/payment.routes')
 const webHookRoutes = require('./Modules/Payment/paymobWebHook.route')
 const orderRoutes = require('./Modules/Orders/orders.routes')
 const reviewRoutes = require('./Modules/Reviews/reviews.routes')
+const couponRoutes = require('./Modules/Coupon/coupon.routes')
 
 
 const app = express()
@@ -31,6 +32,7 @@ app.use('/api/payment', paymentRoutes)
 app.use('/api/webHook', webHookRoutes)
 app.use('/api/order', orderRoutes)
 app.use('/api/review', reviewRoutes)
+app.use('/api/coupon', couponRoutes)
 
 
 //! Global Error Handler

@@ -95,6 +95,8 @@ model Order {
   id          String      @id @default(uuid())
   userId      String
   user        User        @relation(fields: [userId], references: [id])
+  originalTotal Decimal?
+  totalDiscount Decimal?
   items       OrderItem[]
   totalAmount Decimal
   couponId    String?     // Optional coupon
@@ -123,12 +125,30 @@ enum OrderStatus {
 
 // 4. Promotions & Reviews
 model Coupon {
-  id        String   @id @default(uuid())
-  code      String   @unique
-  discount  Decimal
-  vendorId  String
-  vendor    User     @relation(fields: [vendorId], references: [id])
-  orders    Order[]
+  id            String   @id @default(uuid())
+  code          String   @unique
+  discount      Decimal  // Is this a percentage or a fixed amount? 
+  type          DiscountType @default(FIXED) // PERCENTAGE or FIXED
+  maxDiscount   Decimal? // Vital if using percentage (e.g., 10% off up to $50)
+  minOrderValue Decimal? // Coupon only valid if order > $X
+  
+  usageLimit    Int?     // Total times this coupon can be used
+  usedCount     Int      @default(0)
+  
+  startDate     DateTime @default(now())
+  endDate       DateTime
+  isActive      Boolean  @default(true)
+
+  vendorId      String
+  vendor        User     @relation(fields: [vendorId], references: [id])
+  orders        Order[]
+  
+  createdAt     DateTime @default(now())
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
 }
 
 model Review {

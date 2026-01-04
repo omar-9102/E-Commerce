@@ -5,7 +5,8 @@ const orderService = require('./orders.services')
 const orderNow = async(req, res, next)=> {
     try{
         const userId = req.user.id
-        const result = await orderService.checkOut(userId)
+        const {couponcode} = req.body
+        const result = await orderService.checkOut(userId, couponcode)
         return res.status(200).json({message: "Order made successfully", data: result});
     }catch(error){
         return next(error)
