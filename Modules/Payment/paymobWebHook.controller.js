@@ -59,28 +59,34 @@ const paymobWebhook = async (req, res) => {
             });
 
             if (success) {
-                // Update Order Status to PAID
+                // Update Order Status
                 await tx.order.update({
                     where: { id: paymentRecord.orderId },
                     data: { status: "PAID" }
                 });
 
-                // --- NEW: DECREASE STOCK LOGIC ---
-                // Loop through each item in the order and decrement product stock
+                // Decrease stock
                 for (const item of paymentRecord.order.items) {
                     await tx.product.update({
                         where: { id: item.productId },
                         data: {
-                            // Using the atomic decrement helper from Prisma
-                            stock: {
-                                decrement: item.quantity
-                            }
+                            stock: { decrement: item.quantity }
                         }
                     });
                 }
-                // ---------------------------------
+
+                // ✅ Increment coupon usage (SAFE)
+                if (paymentRecord.order.couponId) {
+                    await tx.coupon.update({
+                        where: { id: paymentRecord.order.couponId },
+                        data: {
+                            usedCount: { increment: 1 }
+                        }
+                    });
+                }
             }
         });
+
 
         console.log(`✅ Success: Payment status updated and stock decreased for order ${merchant_order_id}`);
         res.sendStatus(200);
