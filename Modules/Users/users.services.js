@@ -7,6 +7,25 @@ const appError = require('../../utils/AppError')
 const httpStatusText = require('../../utils/httpStatusText')
 const cloudinary = require('../../config/cloudinary')
 
+
+
+const getAllUsers = async () => {
+  // Uses findMany to fetch all records
+    return await prisma.user.findMany({where: {role: userRules.USER}, omit:{password: true}})
+};
+
+const getAllVendors = async () => {
+  // Uses findMany to fetch all records
+    return await prisma.user.findMany({where: {role: userRules.VENDOR}, omit:{password: true}})
+};
+
+const getUserInfoForAdmin = async(userId) =>{
+    const user = await prisma.user.findUnique({where:{id: userId}, omit:{password: true}})
+    if(!user)
+        throw appError.create("User not found")
+    return user
+}
+
 const register = async (data, file) => {
     const { firstName, lastName, username, email, password, address, phone, role } = data
     if(!firstName || !lastName || !username || !email || !password || !address)
@@ -46,16 +65,6 @@ const register = async (data, file) => {
         email: user.email,
         avatarUrl: user.avatarUrl
     }, token };
-};
-
-const getAllUsers = async () => {
-  // Uses findMany to fetch all records
-    return await prisma.user.findMany({where: {role: userRules.USER}})
-};
-
-const getAllVendors = async () => {
-  // Uses findMany to fetch all records
-    return await prisma.user.findMany({where: {role: userRules.VENDOR}})
 };
 
 const vendorRegistration = async (data, file) => {
@@ -132,7 +141,7 @@ const login = async(email, password) =>{
     if(!passwordDecryption){
         throw new Error("Invalid Email or Password")
     }
-    const token = generateToken(user);
+    const token = generateToken({id: user.id, role: user.role});
     return {user: {
         id: user.id,
         Welcome_Message: `Hi! ${user.firstName} ${user.lastName}`,
@@ -155,4 +164,4 @@ const deleteMyAccount = async(userId) =>{
 }
 
 
-module.exports = { getAllUsers,getAllVendors, vendorRegistration, userRegistration, login, updateProfile, deleteMyAccount};
+module.exports = { getAllUsers,getAllVendors, vendorRegistration, userRegistration, login, updateProfile, deleteMyAccount, getUserInfoForAdmin};

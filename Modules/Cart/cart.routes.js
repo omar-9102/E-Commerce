@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const validate = require('../../middlewares/validate');
 const {verifyToken} = require('../../middlewares/verifyToken');
-const cartController = require('./cart.contoller')
+const cartController = require('./cart.controller')
 const {userRules} = require('../../utils/roles')
 const allowTo = require('../../utils/allowTo');
 
