@@ -59,6 +59,12 @@ model Product {
   reviews     Review[]
   cartItems   CartItem[]
   orderItems  OrderItem[]
+  createdAt   DateTime? @default(now())
+
+  @@index([name])
+  @@index([categoryId])
+  @@index([price])
+  @@index([createdAt])
 }
 
 model Image {

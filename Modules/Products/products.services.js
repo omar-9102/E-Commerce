@@ -1,7 +1,4 @@
 const prisma = require('../../lib/prisma'); 
-const bcrypt = require('bcrypt');
-const {userRules} = require('../../utils/roles')
-const generateToken = require('../../utils/generateToken');
 const appError = require('../../utils/AppError')
 const httpStatusText = require('../../utils/httpStatusText')
 const cloudinary = require('../../config/cloudinary')
@@ -11,9 +8,64 @@ const getAllProductsPaginated = async(page = 1, limit = 10) =>{
     const products = await prisma.product.findMany({
         skip: offset,
         take: limit,
+        select: {
+            id: true,
+            name: true,
+            price: true,
+            description: true,
+            reviews: {
+                select: {
+                    rating: true
+                }
+            },
+            images: {
+                select: {
+                    url: true
+                }
+            }
+        }
     });
     return products;
 }
+
+const searchProductsByText = async (keyword) => {
+    if (typeof keyword !== "string") return [];
+    const cleanedKeyword = keyword.trim();
+    if (!cleanedKeyword) return [];    
+    return prisma.product.findMany({
+        where: {
+        OR: [
+            {
+            name: {
+                contains: cleanedKeyword,
+                mode: "insensitive"
+            }
+        },
+        {
+            description: {
+                contains: cleanedKeyword,
+                mode: "insensitive"
+            }
+        }
+    ]},
+    select:{
+        id: true,
+        name: true,
+        price: true,
+        description: true,
+        reviews:{
+            select:{
+                rating: true
+            }
+        },
+        images: {
+            select: {
+                url: true
+            }
+        }
+    }
+    });
+};
 
 const createProduct = async (data, files) => {
     const { name, description, price, stock, vendorId, categoryId } = data
@@ -174,4 +226,11 @@ const getMyReviews = async(userId) =>{
     return reviews
 }
 
-module.exports = { createProduct, updateProduct, getAllProductsPaginated, getVendorProducts,deleteProduct, makeReview, getMyReviews };
+module.exports = { createProduct,
+    updateProduct, 
+    getAllProductsPaginated, 
+    getVendorProducts,deleteProduct, 
+    makeReview, 
+    getMyReviews, 
+    searchProductsByText
+};

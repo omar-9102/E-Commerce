@@ -49,4 +49,14 @@ const getMyReviews = asyncWrapper(async(req, res) =>{
     res.status(200).json({message:"Here are all your reviews", data: reviews})
 })
 
-module.exports = {createProduct, getAllProductsPaginated, updateProduct, deleteProduct, getVendorProducts, review, getMyReviews};
+const search = asyncWrapper(async(req, res) =>{
+    let { q, word } = req.query;
+    let keyword = q || word;
+    if (Array.isArray(keyword)) keyword = keyword[0];
+    if (keyword !== undefined) keyword = String(keyword);    
+    const products = await productServices.searchProductsByText(keyword)
+    console.log("RAW q:", req.query.word, typeof req.query.word);
+    return res.status(200).json({count: products.length, data: products})
+})
+
+module.exports = {createProduct, getAllProductsPaginated, updateProduct, deleteProduct, getVendorProducts, review, getMyReviews, search};

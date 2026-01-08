@@ -13,5 +13,7 @@ router.delete('/deleteProduct/:id', verifyToken, allowTo(userRules.VENDOR), prod
 router.get('/getVendorProducts', verifyToken, allowTo(userRules.VENDOR), productsController.getVendorProducts);
 router.post('/:productId/review', verifyToken, allowTo(userRules.USER), productsController.review)
 router.get('/showMyReviews', verifyToken, allowTo(userRules.USER),productsController.getMyReviews )
+router.get('/search', verifyToken, allowTo(userRules.USER, userRules.VENDOR, userRules.ADMIN, userRules.SUPERADMIN),productsController.search )
+
 
 module.exports = router;
