@@ -1,29 +1,21 @@
 const httpStatusText = require('../../utils/httpStatusText')
 const prisma = require('../../lib/prisma');
+const appError = require('../../utils/AppError')
 
 
 const createCategory = async (data) => {
     const { name, parentId } = data;
-
     // 1. If parentId is provided, verify the parent category exists
     if (parentId) {
-        const parentExists = await prisma.category.findUnique({
-            where: { id: parentId },
-        });
-
-    if (!parentExists) {
-        throw new Error("Parent category not found");
+        const parentExists = await prisma.category.findUnique({where: { id: parentId },});
+        if (!parentExists)
+            throw appError.create("Parent category not found", 404, httpStatusText.FAIL)
     }
-}
+    if(!name)
+        throw appError.create("Must provide category name", 400, httpStatusText.FAIL)
 
-    // 2. Create the category
-    return await prisma.category.create({
-    data: {
-        name,
-        parentId: parentId || null, // Connects to parent if it exists
-    },
-    });
-};
+    return await prisma.category.create({data: {name: name, parentId: parentId || null }});
+}
 
 const buildCategoryTree = async (categories) => {
     const map = {};
@@ -63,7 +55,6 @@ const getCategoriesTreeWithProducts = async () =>{
         )
     }));
 
-    // Reuse tree logic
     return buildCategoryTree(enrichedCategories);
 }
 
@@ -97,11 +88,11 @@ const updateCategory = async (id, data) =>{
     const updates = Object.keys(data);
     const isValid = updates.every((update) => allowedUpdates.includes(update))
     if(!isValid){
-        throw new Error('Invalid updates', 400)
+        throw appError.create("Invalid updates", 400, httpStatusText.FAIL)
     }
     const category = await prisma.category.findUnique({where: {id}})
     if(!category){
-        throw new Error('Category not found', 404)
+        throw appError.create("Category not found", 404, httpStatusText.FAIL)
     }
     updates.forEach((update) => category[update] = data[update])
     await prisma.category.update({where: {id}, data: category})
@@ -111,15 +102,18 @@ const updateCategory = async (id, data) =>{
 const deleteCategory = async(id)=>{
     const category = await prisma.category.findUnique({where: {id}})
     if(!category)
-        throw new Error('Category not found', 404)
+        throw appError.create("Category not found", 404, httpStatusText.FAIL)
+
     // check if category has subcategories
     const subCategories = await prisma.category.findMany({where: {parentId: id}})
     if(subCategories.length > 0)
-        throw new Error('Cannot delete category with subcategories', 400)
+        throw appError.create("Cannot delete category assigned to subcategories", 400, httpStatusText.FAIL)
+
     // check if category is assigned to any products
     const products = await prisma.product.findMany({where: {categoryId: id}})
     if(products.length > 0)
-        throw new Error('Cannot delete category assigned to products', 400)
+        throw appError.create("Cannot delete category assigned to products", 400, httpStatusText.FAIL)
+
     // ch
     await prisma.category.delete({where: {id}})
     return
