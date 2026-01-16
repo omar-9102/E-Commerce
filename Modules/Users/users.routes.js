@@ -18,4 +18,6 @@ router.post('/registerUser', upload.single('avatarUrl'), validate(userValidators
 router.post('/login', validate(userValidators.loginUserSchema), userController.login)
 router.patch('/updateProfile', verifyToken, allowTo(userRules.USER, userRules.VENDOR), upload.single('avatarUrl'), userController.updateUserProfile);
 router.delete('/deleteAccount', verifyToken, allowTo(userRules.USER, userRules.VENDOR), userController.deleteMyAccount)
+router.get('/vendorDashboard', verifyToken, allowTo(userRules.VENDOR), userController.vendorDashboard);
+
 module.exports = router;

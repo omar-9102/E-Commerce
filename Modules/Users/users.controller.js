@@ -2,6 +2,7 @@ const userServices = require('./users.services')
 const appError = require('../../utils/AppError');
 const httpStatusText = require('../../utils/httpStatusText');
 const asyncWrapper = require('express-async-handler')
+const vendorDashboardService = require('./users.analytics')
 
 const getUsers = asyncWrapper(async (req, res) => {
     const users = await userServices.getAllUsers();
@@ -41,11 +42,17 @@ const updateUserProfile = asyncWrapper(async(req, res) =>{
     res.status(200).json({message: "Profile updated successfully", data: user});
 })
 
-const deleteMyAccount = asyncWrapper(async(req, res, next) =>{
+const deleteMyAccount = asyncWrapper(async(req, res) =>{
     const userId = req.user.id
     const user = await userServices.deleteMyAccount(userId)
     res.status(200).json({message: "Account deleted succesfully", data:`${user.email} deleted`})
 })
 
+const vendorDashboard = asyncWrapper(async(req, res) => {
+    const vendorId = req.user.id
+    const data = await vendorDashboardService(vendorId)
+    return res.status(200).json({data: data})
+})
 
-module.exports = { getUsers, getVendors, registerVendor, registerUser, login, updateUserProfile, deleteMyAccount, getUserInfo };
+
+module.exports = { getUsers, getVendors, registerVendor, registerUser, login, updateUserProfile, deleteMyAccount, getUserInfo, vendorDashboard };

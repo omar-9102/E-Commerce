@@ -7,7 +7,7 @@ const {userRules} = require('../../utils/roles')
 const upload = require('../../config/multer.config')
 
 router.post('/createProduct', verifyToken, allowTo(userRules.VENDOR),upload.array('images', 5), productsController.createProduct);
-router.get('/getAllProductsPaginated', productsController.getAllProductsPaginated);
+router.get('/getAllProductsPaginated', verifyToken, allowTo(userRules.USER), productsController.getAllProductsPaginated);
 router.patch('/updateProduct/:id', verifyToken, allowTo(userRules.VENDOR), productsController.updateProduct);
 router.delete('/deleteProduct/:id', verifyToken, allowTo(userRules.VENDOR), productsController.deleteProduct);
 router.get('/getVendorProducts', verifyToken, allowTo(userRules.VENDOR), productsController.getVendorProducts);
